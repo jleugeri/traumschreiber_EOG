@@ -1,0 +1,9 @@
+numpy==1.12.0
+pandas==0.19.2
+pexpect==4.2.1
+ptyprocess==0.5.1
+PyQt5==5.7.1
+python-dateutil==2.6.0
+pytz==2016.10
+sip==4.19
+six==1.10.0
