@@ -1,12 +1,12 @@
 import pexpect
-import datetime
+from datetime import datetime
 import time
 import numpy as np
 import threading
 import random
 
 from PyQt5.QtWidgets import QApplication, QWidget, QGraphicsView, QGraphicsScene
-from PyQt5.QtGui import QKeyEvent, QBrush, QPen, QPixmap
+from PyQt5.QtGui import QKeyEvent, QBrush, QPen, QPixmap, QCloseEvent
 from PyQt5.Qt import Qt
 from PyQt5.QtCore import QThread, QRect, QRectF, QPoint, QSize
 from PyQt5.QtTest import QTest
@@ -16,6 +16,8 @@ from PyQt5.QtTest import QTest
 # setup variables
 device_addr = '20:73:7A:17:69:31'
 chx_handle = '0x010c'
+gatt_logging = False
+filename = 'dump.csv'
 
 
 # global variables for thread communication
@@ -23,12 +25,15 @@ current_x = 0
 current_y = 0
 lock = threading.Lock()
 
+data = []
+
 
 class GattListener:
 
-    def __init__(self, device_addr, char_handle):
+    def __init__(self, device_addr, char_handle, gatt_logging):
         self.device_addr = device_addr
         self.char_handle = char_handle
+        self.gatt_logging = gatt_logging
         self.gatt_process = None
         self.thread = None
         self.running = True
@@ -58,12 +63,26 @@ class GattListener:
 
 
     def run(self):
+        global current_x, current_y, lock, data
         self.spawn_gattprocess()
+        t1 = time.time()
+        counter = 0
         while self.running:
             try:
                 self.gatt_process.expect('Notification handle = {hndl} value: ([0123456789abcdef ]*) \r\n'.format(hndl=self.char_handle), timeout=1)
                 values,  = self.gatt_process.match.groups()
-                self.log('received values: {}'.format(self.parse(values)))
+                values = self.parse(values)
+                with lock:
+                    value_tuple = (time.time(), values, (current_x, current_y))
+                data.append(value_tuple)
+                counter += 1
+                if counter == 100:
+                    t2 = time.time()
+                    self.log('Receiving {:d} packages per second.'.format(int(100/(t2-t1))))
+                    counter = 0
+                    t1 = t2
+                if self.gatt_logging:
+                    self.log('received values: {}'.format(value_tuple))
 
             except pexpect.TIMEOUT:
                 self.log('Connection timeout! Restarting connection ...')
@@ -184,12 +203,16 @@ class Stimulus(QGraphicsView):
             else:
                 self.start()
 
+    def closeEvent(self, event : QCloseEvent):
+        self.stop()
+        event.accept()
+
     @staticmethod
     def log(msg):
         print('[STIM]: {msg}'.format(msg=msg))
 
 
-gatt = GattListener(device_addr, chx_handle)
+gatt = GattListener(device_addr, chx_handle, gatt_logging)
 gatt.start()
 
 qapp = QApplication([])
@@ -199,4 +222,8 @@ qapp.exec_()
 
 gatt.stop()
 
+with open(filename, 'w') as f:
+    f.write('t, ' + ', '.join('ch{}'.format(n) for n in range(8)) + ', x, y\n')
+    for time, vals, (x, y) in data:
+        f.write('{}, {}, {}, {}\n'.format(time, ", ".join(str(v) for v in vals), x, y))
 
