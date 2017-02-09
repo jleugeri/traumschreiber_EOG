@@ -120,8 +120,12 @@ class Stimulus(QGraphicsView):
 
 
     def stop(self):
+        global current_x, current_y, lock
         self.log('Stopping...')
         self.running = False
+        with lock:
+            current_x = 0
+            current_y = 0
 
     def start(self):
         self.log('Starting...')

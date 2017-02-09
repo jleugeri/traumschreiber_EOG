@@ -1,7 +1,10 @@
+cycler==0.10.0
+matplotlib==2.0.0
 numpy==1.12.0
 pandas==0.19.2
 pexpect==4.2.1
 ptyprocess==0.5.1
+pyparsing==2.1.10
 PyQt5==5.7.1
 python-dateutil==2.6.0
 pytz==2016.10
