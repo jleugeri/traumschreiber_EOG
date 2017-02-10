@@ -3,7 +3,7 @@ import matplotlib
 matplotlib.use('qt5agg')
 from matplotlib import pyplot as plt
 
-data = np.genfromtxt('dump.csv', delimiter=', ')
+data = np.genfromtxt('data/run5.csv', delimiter=', ')
 
 eog = data[1:, 2:5]
 print(eog.shape)

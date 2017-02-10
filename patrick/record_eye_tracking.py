@@ -128,11 +128,13 @@ class Stimulus(QGraphicsView):
             current_y = 0
 
     def start(self):
+        global current_x, current_y, lock
         self.log('Starting...')
         self.running = True
 
         # TODO: pick different parameters for each run
-        while self.running:
+        batch = 0
+        while self.running and batch < 10:
 
             n = 20
             t = 800
@@ -159,6 +161,11 @@ class Stimulus(QGraphicsView):
                 x = random.randrange(rect.width()-2*border)
                 y = random.randrange(rect.height()-2*border)
                 self.show_point(border+x, border+y, t, sigma)
+
+            batch += 1
+            with lock:
+                current_x = 0
+                current_y = 0
 
         self.scene().clear()
         QApplication.processEvents()
