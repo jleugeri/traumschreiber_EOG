@@ -134,7 +134,7 @@ class Stimulus(QGraphicsView):
         # TODO: pick different parameters for each run
         while self.running:
 
-            n = 10
+            n = 20
             t = 800
             sigma = 100
             border = 50
@@ -142,9 +142,9 @@ class Stimulus(QGraphicsView):
             rect = self.frameRect()  # type: QRect
 
             # show corner points for calibration in random order
-            # top-left, bottom-left, bottom-right, top-right
-            xs = [border, border, rect.width() - border, rect.width() - border]
-            ys = [border, rect.height() - border, rect.height() - border, border]
+            # top-left, bottom-left, bottom-right, top-right, center
+            xs = [border, border, rect.width() - border, rect.width() - border, rect.width()/2]
+            ys = [border, rect.height() - border, rect.height() - border, border, rect.height()/2]
             corners = list(zip(xs, ys))
             random.shuffle(corners)
             for x, y in corners:

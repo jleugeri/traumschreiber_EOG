@@ -5,18 +5,18 @@ from matplotlib import pyplot as plt
 
 data = np.genfromtxt('dump.csv', delimiter=', ')
 
-eog = data[1:, 5:9]
+eog = data[1:, 2:5]
 print(eog.shape)
 
 plt.figure()
-dist = 200
+dist = 1000
 plt.subplot(2, 1, 1)
-for i in range(4):
+for i in range(3):
     dat = eog[:, i]
-    dat[np.abs(dat) > 500] = np.nan
+    dat[np.abs(dat) > 1000] = np.nan
     plt.plot(eog[:, i] + i*dist, label='ch{}'.format(i))
 
-plt.ylim(-500, 500+3*dist)
+plt.ylim(-1000, 1000+2*dist)
 plt.legend()
 plt.subplot(2, 1, 2)
 plt.plot(data[1:, 9], label='x')
